@@ -19,6 +19,7 @@
 //
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -181,17 +182,28 @@ namespace MonoTouch.NUnit.UI {
 
 			return null;
 		}
-		
+
+#if !__MACCATALYST__
+		[Conditional ("IGNORED")]
+#endif
+		internal static void TraceLine (string message)
+		{
+			Console.WriteLine (message);
+		}
 
 		public void AutoRun ()
 		{
+			Console.WriteLine ("AutoRun ()");
 			if (!AutoStart) {
 				SelectLastTestSuite ();
 				return;
 			}
 
+			TraceLine ("AutoRun (): queuing test run on main thread");
 			ExecuteOnMainThread (() => {
+				TraceLine ("AutoRun (): running tests on main thread");
 				Run ();
+				TraceLine ("AutoRun (): completed test run on main thread");
 
 				// optionally end the process, e.g. click "Touch.Unit" -> log tests results, return to springboard...
 				// http://stackoverflow.com/questions/1978695/uiapplication-sharedapplication-terminatewithsuccess-is-not-there
@@ -729,11 +741,15 @@ namespace MonoTouch.NUnit.UI {
 			var dialog = new DialogViewController (menu) { Autorotate = true };
 			var dialogView = dialog.View;
 
+			TraceLine ("Queuing test loading on background thread");
 			ThreadPool.QueueUserWorkItem ((v) => {
+				TraceLine ("Loading tests on background thread");
 				LoadSync ();
+				TraceLine ("Loaded tests on background thread, queuing UI update on main thead");
 
 				ExecuteOnMainThread (() =>
 				{
+					TraceLine ("Updating UI on main thead");
 					foreach (TestSuite ts in Suite.Tests) {
 						main.Add (Setup (ts));
 					}
