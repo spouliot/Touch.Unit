@@ -30,6 +30,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CoreFoundation;
 using Foundation;
 using ObjCRuntime;
 #if !__MACOS__
@@ -879,7 +880,7 @@ namespace MonoTouch.NUnit.UI {
 			get {
 				IntPtr handle = UIDevice.CurrentDevice.Handle;
 				if (UIDevice.CurrentDevice.RespondsToSelector (new Selector ("uniqueIdentifier")))
-					return NSString.FromHandle (objc_msgSend (handle, Selector.GetHandle("uniqueIdentifier")));
+					return CFString.FromHandle (objc_msgSend (handle, Selector.GetHandle("uniqueIdentifier")));
 				return "unknown";
 			}
 		}
